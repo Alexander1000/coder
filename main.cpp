@@ -68,13 +68,11 @@ int main()
 	cin >> szFile1;
 	hFile1 = fopen(szFile1, "w+");
 	free(szFile1);
-	// delete szFile1;
 	char *szFile2 = new char[100];
 	memset(szFile2, 0, 100);
 	cout << "The output file name: ";
 	cin >> szFile2;
 	hFile2 = fopen(szFile2, "w+");
-	// delete szFile2;
 	free(szFile2);
 	int action = 0;
 
@@ -107,20 +105,13 @@ int main()
 			fclose(hKey1);
 		} else {
 			char *szFileKey = new char [100];
-			memset(szFileKey, NULL, 100);
-			cout << "������� ����-����: " << endl;
+			memset(szFileKey, 0, 100);
+			cout << "Enter key-file: " << endl;
 			cin >> szFileKey;
-			HANDLE hKey1 = CreateFileA(szFileKey,
-							GENERIC_READ | GENERIC_WRITE,
-							FILE_SHARE_WRITE,
-							NULL,
-							OPEN_ALWAYS,
-							FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN,
-							NULL);
-			DWORD count = 0;
-			ReadFile(hKey1, key, sizeof(UINT64) * 16, &count, NULL);
-			CloseHandle(hKey1);
-			delete szFileKey;
+			FILE *hKey1 = fopen(szFileKey, "w+");
+			fread(key, sizeof(UINT64), 16, hKey1);
+			fclose(hKey1);
+			free(szFileKey);
 		}
 
 		UINT64 size = 0;
