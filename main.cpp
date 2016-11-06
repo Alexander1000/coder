@@ -97,7 +97,7 @@ int main()
 		if (action == 1) {
 			// generate key
 			for (int i = 0; i < 16; i++) {
-				key[i] = (randomizer.randomize(0xFFFFFFFF) << 32) + randomizer.randomize(0xFFFFFFFF);
+				key[i] = ((UINT64) randomizer.randomize(0xFFFFFFFF) << 32) + randomizer.randomize(0xFFFFFFFF);
 			}
 			
 			FILE *hKey1 = fopen("key1.bin", "w+");
@@ -163,103 +163,77 @@ int main()
 			Index++;
 		} while(count == sizeof(UINT64));
 
-		{
-			HANDLE hKey1 = CreateFileA("key2.bin",
-						GENERIC_READ | GENERIC_WRITE,
-						FILE_SHARE_WRITE,
-						NULL,
-						CREATE_ALWAYS,
-						FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN,
-						NULL);
-			DWORD count = 0;
-			WriteFile(hKey1, key, sizeof(UINT64) * 16, &count, NULL);
-			CloseHandle(hKey1);
-		}
-		delete key;
-	}
-	else
-	{
+		FILE *hKey1;
+		hKey1 = fopen("key2.bin", "w+");
+		fwrite(key, sizeof(UINT64), 16, hKey1);
+		fclose(hKey1);
+		free(key);
+	} else {
 		// decode
-		HANDLE hKey = (HANDLE)0xFFFFFFFF;
-		do
-		{
-			char *pName = new char [100];
-			cout << "������� ����-����: ";
-			cin >> pName;
-			hKey = CreateFileA(pName,
-						GENERIC_READ | GENERIC_WRITE,
-						FILE_SHARE_WRITE,
-						NULL,
-						OPEN_EXISTING,
-						FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN,
-						NULL);
-		}
-		while(hKey == (HANDLE)0xFFFFFFFF);
+		FILE *hKey;
+
+		char *pName = new char [100];
+		cout << "Enter key-file: ";
+		cin >> pName;
+		hKey = fopen(pName, "r");
 		UINT64 *key = new UINT64[16];
-		DWORD count = 0;
-		ReadFile(hKey, key, 16 * sizeof(UINT64), &count, NULL);
-		CloseHandle(hKey);
+		size_t count = 0;
+		count = fread(key, sizeof(UINT64), 16, hKey);
+		fclose(hKey);
 
-		UINT64 size = 0;
-		DWORD dwSizeLow, dwSizeHight;
-		dwSizeLow = GetFileSize(hFile1, &dwSizeHight);
-		size += dwSizeLow;
-		size += ((UINT64)dwSizeHight << 32);
+		fseek(hFile1, 0L, SEEK_END);
+		UINT64 size = ftell(hFile1);
 
-		LARGE_INTEGER liPointer;
+		UINT64 liPointer;
 		UINT64 Index = size / (sizeof(UINT64) * 4);
 
 		do
 		{
-			UINT64 A = NULL, B = NULL, C = NULL, D = NULL;
-			liPointer.QuadPart = (Index - 1) * 4 * sizeof(UINT64);
-			SetFilePointer(hFile1, liPointer.LowPart, &liPointer.HighPart, FILE_BEGIN);
-			UINT64 temp = NULL;
-			ReadFile(hFile1, &temp, sizeof(UINT64), &count, NULL);
+			UINT64 A = 0, B = 0, C = 0, D = 0;
+			liPointer = (Index - 1) * 4 * sizeof(UINT64);
+			fseek(hFile1, liPointer, SEEK_SET);
+			UINT64 temp = 0;
+			count = fread(&temp, sizeof(UINT64), 1, hFile1);
 			memcpy(&A, &temp, count);
-			if(count == sizeof(UINT64))
-			{
-				ReadFile(hFile1, &temp, sizeof(UINT64), &count, NULL);
+
+			if(count == sizeof(UINT64)) {
+				count = fread(&temp, sizeof(UINT64), 1, hFile1);
 				memcpy(&B, &temp, count);
-			}
-			else
-			{
-				if (count == 0)break;
+			} else {
+				if (count == 0) break;
 				count = 0;
 			}
-			if(count == sizeof(UINT64))
-			{
-				ReadFile(hFile1, &temp, sizeof(UINT64), &count, NULL);
+
+			if (count == sizeof(UINT64)) {
+				count = fread(&temp, sizeof(UINT64), 1, hFile1);
 				memcpy(&C, &temp, count);
-			}
-			else
-			{
+			} else {
 				count = 0;
 			}
-			if(count == sizeof(UINT64))
-			{
-				ReadFile(hFile1, &temp, sizeof(UINT64), &count, NULL);
+
+			if (count == sizeof(UINT64)) {
+				count = fread(&temp, sizeof(UINT64), 1, hFile1);
 				memcpy(&D, &temp, count);
-			}
-			else
-			{
+			} else {
 				count = 0;
 			}
-			for (int i = 0; i < 16; i++)
-			{
+
+			for (int i = 0; i < 16; i++) {
 				Decode(&A, &B, &C, &D, &key[15 - i]);
 			}
-			DWORD count2 = 0;
-			liPointer.QuadPart = (Index - 1) * 4 * sizeof(UINT64);
-			SetFilePointer(hFile2, liPointer.LowPart, &liPointer.HighPart, FILE_BEGIN);
-			WriteFile(hFile2, &A, sizeof(UINT64), &count2, NULL);
-			WriteFile(hFile2, &B, sizeof(UINT64), &count2, NULL);
-			WriteFile(hFile2, &C, sizeof(UINT64), &count2, NULL);
-			WriteFile(hFile2, &D, sizeof(UINT64), &count2, NULL);
+
+			liPointer = (Index - 1) * 4 * sizeof(UINT64);
+			fseek(hFile2, liPointer, SEEK_SET);
+			fwrite(&A, sizeof(UINT64), 1, hFile2);
+			fwrite(&B, sizeof(UINT64), 1, hFile2);
+			fwrite(&C, sizeof(UINT64), 1, hFile2);
+			fwrite(&D, sizeof(UINT64), 1, hFile2);
 			Index--;
-		} while(Index != 0);
-		delete key;
+		} while (Index != 0);
+
+		free(key);
 	}
+
 	fclose(hFile1);
 	fclose(hFile2);
 	return 0;
