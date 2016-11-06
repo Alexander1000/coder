@@ -115,62 +115,53 @@ int main()
 		}
 
 		UINT64 size = 0;
-		DWORD dwSizeLow, dwSizeHight;
-		dwSizeLow = GetFileSize(hFile1, &dwSizeHight);
-		size += dwSizeLow;
-		size += ((UINT64)dwSizeHight << 32);
-		DWORD count = 0;
+		fseek(hFile1, 0L, SEEK_END);
+		size = ftell(hFile1);
+		size_t count = 0;
 		UINT64 Index = 0;
-		do
-		{
-			UINT64 A = NULL, B = NULL, C = NULL, D = NULL;
-			LARGE_INTEGER liPointer;
-			liPointer.QuadPart = Index * 4 * sizeof(UINT64);
-			SetFilePointer(hFile1, liPointer.LowPart, &liPointer.HighPart, FILE_BEGIN);
-			UINT64 temp = NULL;
-			ReadFile(hFile1, &temp, sizeof(UINT64), &count, NULL);
+
+		do {
+			UINT64 A = 0, B = 0, C = 0, D = 0;
+			UINT64 liPointer = Index * 4 * sizeof(UINT64);
+			fseek(hFile1, liPointer, SEEK_SET);
+			UINT64 temp = 0;
+			count = fread(&temp, sizeof(UINT64), 1, hFile1);
 			memcpy(&A, &temp, count);
-			if(count == sizeof(UINT64))
-			{
-				ReadFile(hFile1, &temp, sizeof(UINT64), &count, NULL);
+
+			if(count == sizeof(UINT64)) {
+				count = fread(&temp, sizeof(UINT64), 1, hFile1);
 				memcpy(&B, &temp, count);
-			}
-			else
-			{
+			} else {
 				count = 0;
 			}
-			if(count == sizeof(UINT64))
-			{
-				ReadFile(hFile1, &temp, sizeof(UINT64), &count, NULL);
+
+			if(count == sizeof(UINT64)) {
+				count = fread(&temp, sizeof(UINT64), 1, hFile1);
 				memcpy(&C, &temp, count);
-			}
-			else
-			{
+			} else {
 				count = 0;
 			}
-			if(count == sizeof(UINT64))
-			{
-				ReadFile(hFile1, &temp, sizeof(UINT64), &count, NULL);
+
+			if(count == sizeof(UINT64)) {
+				count = fread(&temp, sizeof(UINT64), 1, hFile1);
 				memcpy(&D, &temp, count);
-			}
-			else
-			{
+			} else {
 				count = 0;
 			}
-			for (int i = 0; i < 16; i++)
-			{
+
+			for (int i = 0; i < 16; i++) {
 				Encode(&A, &B, &C, &D, &key[i]);
 			}
-			DWORD count2 = 0;
-			liPointer.QuadPart = Index * 4 * sizeof(UINT64);
-			SetFilePointer(hFile2, liPointer.LowPart, &liPointer.HighPart, FILE_BEGIN);
-			WriteFile(hFile2, &A, sizeof(UINT64), &count2, NULL);
-			WriteFile(hFile2, &B, sizeof(UINT64), &count2, NULL);
-			WriteFile(hFile2, &C, sizeof(UINT64), &count2, NULL);
-			WriteFile(hFile2, &D, sizeof(UINT64), &count2, NULL);
+
+			liPointer = Index * 4 * sizeof(UINT64);
+			fseek(hFile2, liPointer, SEEK_SET);
+
+			fwrite(&A, sizeof(UINT64), 1, hFile2);
+			fwrite(&B, sizeof(UINT64), 1, hFile2);
+			fwrite(&C, sizeof(UINT64), 1, hFile2);
+			fwrite(&D, sizeof(UINT64), 1, hFile2);
 			Index++;
-		}
-		while(count == sizeof(UINT64));
+		} while(count == sizeof(UINT64));
 
 		{
 			HANDLE hKey1 = CreateFileA("key2.bin",
