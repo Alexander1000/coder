@@ -10,7 +10,7 @@ typedef uint8_t UINT8;
 
 UINT64 F(UINT64 digit);
 UINT64 G(UINT64 digit);
-//UINT64 Rotate(UINT64 digit, UINT64 exp);
+
 UINT64 Rotate(UINT64 digit, UINT8 exp);
 void Encode(UINT64 *A, UINT64 *B, UINT64 *C, UINT64 *D, UINT64 *key);
 void Decode(UINT64 *A, UINT64 *B, UINT64 *C, UINT64 *D, UINT64 *key);
@@ -61,88 +61,51 @@ Randomizer_2011 randomizer;
 
 int main()
 {
-	setlocale(LC_ALL, "Russian");
-
-	HANDLE hFile1, hFile2;
+	FILE *hFile1, *hFile2;
 	char *szFile1 = new char[100];
-	memset(szFile1, NULL, 100);
-	cout << "������� ��� �����: ";
+	memset(szFile1, 0, 100);
+	cout << "Then input file name: ";
 	cin >> szFile1;
-	hFile1 = CreateFileA(szFile1,
-					GENERIC_READ | GENERIC_WRITE,
-					FILE_SHARE_WRITE,
-					NULL,
-					OPEN_EXISTING,
-					FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN,
-					NULL);
-	if(hFile1 == (HANDLE)0xffffffff)
-	{
-		hFile1 = CreateFileA(szFile1,
-						GENERIC_READ | GENERIC_WRITE,
-						FILE_SHARE_WRITE,
-						NULL,
-						OPEN_ALWAYS,
-						FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN,
-						NULL);
-	}
-	delete szFile1;
+	hFile1 = fopen(szFile1, "w+");
+	free(szFile1);
+	// delete szFile1;
 	char *szFile2 = new char[100];
-	memset(szFile2, NULL, 100);
-	cout << "������� ��� ����� ���������: ";
+	memset(szFile2, 0, 100);
+	cout << "The output file name: ";
 	cin >> szFile2;
-	hFile2 = CreateFileA(szFile2,
-						GENERIC_READ | GENERIC_WRITE,
-						FILE_SHARE_WRITE,
-						NULL,
-						CREATE_ALWAYS,
-						FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN,
-						NULL);
-	delete szFile2;
+	hFile2 = fopen(szFile2, "w+");
+	// delete szFile2;
+	free(szFile2);
 	int action = 0;
-	do
-	{
-		cout << "�������� ��������:" << endl;
-		cout << "1. �����������." << endl;
-		cout << "2. ������������." << endl;
+
+	do {
+		cout << "Select action:" << endl;
+		cout << "1. Encode." << endl;
+		cout << "2. Decode." << endl;
 		cout << "> ";
 		cin >> action;
-	}
-	while(action < 1 || action > 2);
+	} while (action < 1 || action > 2);
 
 	// encode
-	if (action == 1)
-	{
-		// ���������� 1024-������ ����
+	if (action == 1) {
+		// Generate 1024-bit key
 		UINT64 *key = new UINT64[16];
-		memset(key, NULL, sizeof(UINT64) * 16);
-		cout << "���� ��� ����������: " << endl;
-		cout << "1. ������������� ���������." << endl;
-		cout << "2. ������� ����-����." << endl;
+		memset(key, 0, sizeof(UINT64) * 16);
+		cout << "Select action for key: " << endl;
+		cout << "1. Generate file-key." << endl;
+		cout << "2. Read from file." << endl;
 		cin >> action;
-		if (action == 1)
-		{
-			for (int i = 0; i < 16; i++)
-			{
-				LARGE_INTEGER li;
-				li.LowPart = randomizer.randomize(0xFFFFFFFF);
-				li.HighPart = randomizer.randomize(0xFFFFFFFF);
-				key[i] = li.QuadPart;
+
+		if (action == 1) {
+			// generate key
+			for (int i = 0; i < 16; i++) {
+				key[i] = (randomizer.randomize(0xFFFFFFFF) << 32) + randomizer.randomize(0xFFFFFFFF);
 			}
-			{
-				HANDLE hKey1 = CreateFileA("key1.bin",
-							GENERIC_READ | GENERIC_WRITE,
-							FILE_SHARE_WRITE,
-							NULL,
-							CREATE_ALWAYS,
-							FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN,
-							NULL);
-				DWORD count = 0;
-				WriteFile(hKey1, key, sizeof(UINT64) * 16, &count, NULL);
-				CloseHandle(hKey1);
-			}
-		}
-		else
-		{
+			
+			FILE *hKey1 = fopen("key1.bin", "w+");
+			fwrite(key, sizeof(UINT64), 16, hKey1);
+			fclose(hKey1);
+		} else {
 			char *szFileKey = new char [100];
 			memset(szFileKey, NULL, 100);
 			cout << "������� ����-����: " << endl;
@@ -159,6 +122,7 @@ int main()
 			CloseHandle(hKey1);
 			delete szFileKey;
 		}
+
 		UINT64 size = 0;
 		DWORD dwSizeLow, dwSizeHight;
 		dwSizeLow = GetFileSize(hFile1, &dwSizeHight);
@@ -311,12 +275,11 @@ int main()
 			WriteFile(hFile2, &C, sizeof(UINT64), &count2, NULL);
 			WriteFile(hFile2, &D, sizeof(UINT64), &count2, NULL);
 			Index--;
-		}
-		while(Index != 0);
+		} while(Index != 0);
 		delete key;
 	}
-	CloseHandle(hFile1);
-	CloseHandle(hFile2);
+	fclose(hFile1);
+	fclose(hFile2);
 	return 0;
 }
 
