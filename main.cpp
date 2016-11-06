@@ -288,11 +288,14 @@ void Decode(UINT64 *A, UINT64 *B, UINT64 *C, UINT64 *D, UINT64 *key)
 
 UINT64 Rotate(UINT64 digit, UINT8 exp)
 {
-	__asm
+	/*__asm
 	{
 		mov cl, exp
 		rol digit, cl
-	}
+	}*/
+	asm("movb cl, exp; rol digit, cl;");
+	// asm("mov cl, exp");
+	// asm("rol digit, cl");
     return digit;
 }
 
@@ -301,12 +304,12 @@ UINT64 G(UINT64 digit)
 	union
 	{
 		UINT64 dig;
-		BYTE d[8];
+		UINT8 d[8];
 	};
 	dig = digit;
 
 	{
-		BYTE t0 = d[0], t1 = d[1], t2 = d[2], t3 = d[3], t4 = d[4], t5 = d[5], t6 = d[6], t7 = d[7];
+		UINT8 t0 = d[0], t1 = d[1], t2 = d[2], t3 = d[3], t4 = d[4], t5 = d[5], t6 = d[6], t7 = d[7];
 
 		d[2] = t0;
 		d[3] = t1;
@@ -339,7 +342,7 @@ UINT64 F(UINT64 digit)
 	union
 	{
 		UINT64 dig;
-		BYTE d[8];
+		UINT8 d[8];
 	};
 	dig = digit;
 
@@ -357,7 +360,7 @@ UINT64 F(UINT64 digit)
 	d[4] ^= d[2];
 
 	{
-		BYTE t0 = d[0], t1 = d[1], t2 = d[2], t3 = d[3], t4 = d[4], t5 = d[5], t6 = d[6], t7 = d[7];
+		UINT8 t0 = d[0], t1 = d[1], t2 = d[2], t3 = d[3], t4 = d[4], t5 = d[5], t6 = d[6], t7 = d[7];
 
 		d[6] = t0;
 		d[7] = t1;
