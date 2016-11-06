@@ -288,15 +288,17 @@ void Decode(UINT64 *A, UINT64 *B, UINT64 *C, UINT64 *D, UINT64 *key)
 
 UINT64 Rotate(UINT64 digit, UINT8 exp)
 {
-	/*__asm
-	{
-		mov cl, exp
-		rol digit, cl
-	}*/
-	asm("movb cl, exp; rol digit, cl;");
-	// asm("mov cl, exp");
-	// asm("rol digit, cl");
-    return digit;
+	for (UINT8 i = 0; i < exp; i++) {
+            if ((digit & 0x8000000000000000) == 0x8000000000000000)
+            {
+                digit <<= 1;
+                digit |= 1;
+            } else {
+                digit <<= 1;
+            }
+    }
+
+	return digit;
 }
 
 UINT64 G(UINT64 digit)
