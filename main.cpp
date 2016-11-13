@@ -285,6 +285,9 @@ int main()
 
 		fclose(hFile1);
 		fclose(hFile2);
+
+		remove(szFile2);
+		rename(newFile.c_str(), szFile2);
 	}
 
 	return 0;
