@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <ctime>
+#include "cl.cpp"
 
 using namespace std;
 
@@ -59,21 +60,35 @@ class Randomizer_2011
 
 Randomizer_2011 randomizer;
 
-int main()
+int main(int argc, char* argv[])
 {
+	CommandLine commandLine(argc, argv);
+
 	FILE *hFile1, *hFile2;
-	char *szFile1 = new char[100];
-	memset(szFile1, 0, 100);
-	cout << "Then input file name: ";
-	cin >> szFile1;
+	char *szFile1;
+
+	if (commandLine.is("-i")) {
+		szFile1 = commandLine.get("-i");
+	} else {
+		szFile1 = new char[100];
+		memset(szFile1, 0, 100);
+		cout << "Then input file name: ";
+		cin >> szFile1;
+	}
+
 	hFile1 = fopen(szFile1, "r");
-	free(szFile1);
-	char *szFile2 = new char[100];
-	memset(szFile2, 0, 100);
-	cout << "The output file name: ";
-	cin >> szFile2;
+	char *szFile2;
+
+	if (commandLine.is("-o")) {
+		szFile2 = commandLine.get("-o");
+	} else {
+		szFile2 = new char[100];
+		memset(szFile2, 0, 100);
+		cout << "The output file name: ";
+		cin >> szFile2;
+	}
+	
 	hFile2 = fopen(szFile2, "w+");
-	free(szFile2);
 	int action = 0;
 
 	do {
