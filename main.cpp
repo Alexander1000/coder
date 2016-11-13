@@ -91,13 +91,21 @@ int main(int argc, char* argv[])
 	hFile2 = fopen(szFile2, "w+");
 	int action = 0;
 
-	do {
-		cout << "Select action:" << endl;
-		cout << "1. Encode." << endl;
-		cout << "2. Decode." << endl;
-		cout << "> ";
-		cin >> action;
-	} while (action < 1 || action > 2);
+	if (commandLine.is("-e")) {
+		action = 1;
+	} else if (commandLine.is("-d")) {
+		action = 2;
+	}
+
+	if (action == 0) {
+		do {
+			cout << "Select action:" << endl;
+			cout << "1. Encode." << endl;
+			cout << "2. Decode." << endl;
+			cout << "> ";
+			cin >> action;
+		} while (action < 1 || action > 2);
+	}
 
 	// encode
 	if (action == 1) {
