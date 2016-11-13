@@ -66,7 +66,7 @@ int main()
 	memset(szFile1, 0, 100);
 	cout << "Then input file name: ";
 	cin >> szFile1;
-	hFile1 = fopen(szFile1, "w+");
+	hFile1 = fopen(szFile1, "r");
 	free(szFile1);
 	char *szFile2 = new char[100];
 	memset(szFile2, 0, 100);
@@ -108,7 +108,7 @@ int main()
 			memset(szFileKey, 0, 100);
 			cout << "Enter key-file: " << endl;
 			cin >> szFileKey;
-			FILE *hKey1 = fopen(szFileKey, "w+");
+			FILE *hKey1 = fopen(szFileKey, "r");
 			fread(key, sizeof(UINT64), 16, hKey1);
 			fclose(hKey1);
 			free(szFileKey);
@@ -120,30 +120,32 @@ int main()
 		size_t count = 0;
 		UINT64 Index = 0;
 
+		cout << "Begin encode" << endl;
+
 		do {
 			UINT64 A = 0, B = 0, C = 0, D = 0;
 			UINT64 liPointer = Index * 4 * sizeof(UINT64);
 			fseek(hFile1, liPointer, SEEK_SET);
 			UINT64 temp = 0;
-			count = fread(&temp, sizeof(UINT64), 1, hFile1);
+			count = fread(&temp, 1, sizeof(UINT64), hFile1);
 			memcpy(&A, &temp, count);
 
-			if(count == sizeof(UINT64)) {
-				count = fread(&temp, sizeof(UINT64), 1, hFile1);
+			if (count > 0) {
+				count = fread(&temp, 1, sizeof(UINT64), hFile1);
 				memcpy(&B, &temp, count);
 			} else {
 				count = 0;
 			}
 
-			if(count == sizeof(UINT64)) {
-				count = fread(&temp, sizeof(UINT64), 1, hFile1);
+			if (count > 0) {
+				count = fread(&temp, 1, sizeof(UINT64), hFile1);
 				memcpy(&C, &temp, count);
 			} else {
 				count = 0;
 			}
 
-			if(count == sizeof(UINT64)) {
-				count = fread(&temp, sizeof(UINT64), 1, hFile1);
+			if (count > 0) {
+				count = fread(&temp, 1, sizeof(UINT64), hFile1);
 				memcpy(&D, &temp, count);
 			} else {
 				count = 0;
@@ -160,8 +162,11 @@ int main()
 			fwrite(&B, sizeof(UINT64), 1, hFile2);
 			fwrite(&C, sizeof(UINT64), 1, hFile2);
 			fwrite(&D, sizeof(UINT64), 1, hFile2);
+
 			Index++;
-		} while(count == sizeof(UINT64));
+		} while(count > 0);
+
+		cout << "Finish encode" << endl;
 
 		FILE *hKey1;
 		hKey1 = fopen("key2.bin", "w+");
@@ -193,26 +198,26 @@ int main()
 			liPointer = (Index - 1) * 4 * sizeof(UINT64);
 			fseek(hFile1, liPointer, SEEK_SET);
 			UINT64 temp = 0;
-			count = fread(&temp, sizeof(UINT64), 1, hFile1);
+			count = fread(&temp, 1, sizeof(UINT64), hFile1);
 			memcpy(&A, &temp, count);
 
-			if(count == sizeof(UINT64)) {
-				count = fread(&temp, sizeof(UINT64), 1, hFile1);
+			if(count > 0) {
+				count = fread(&temp, 1, sizeof(UINT64), hFile1);
 				memcpy(&B, &temp, count);
 			} else {
 				if (count == 0) break;
 				count = 0;
 			}
 
-			if (count == sizeof(UINT64)) {
-				count = fread(&temp, sizeof(UINT64), 1, hFile1);
+			if (count > 0) {
+				count = fread(&temp, 1, sizeof(UINT64), hFile1);
 				memcpy(&C, &temp, count);
 			} else {
 				count = 0;
 			}
 
-			if (count == sizeof(UINT64)) {
-				count = fread(&temp, sizeof(UINT64), 1, hFile1);
+			if (count > 0) {
+				count = fread(&temp, 1, sizeof(UINT64), hFile1);
 				memcpy(&D, &temp, count);
 			} else {
 				count = 0;
@@ -228,6 +233,7 @@ int main()
 			fwrite(&B, sizeof(UINT64), 1, hFile2);
 			fwrite(&C, sizeof(UINT64), 1, hFile2);
 			fwrite(&D, sizeof(UINT64), 1, hFile2);
+
 			Index--;
 		} while (Index != 0);
 
