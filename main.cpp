@@ -120,14 +120,27 @@ int main()
 		size_t count = 0;
 		UINT64 Index = 0;
 
-		cout << "Begin encode" << endl;
-
 		do {
 			UINT64 A = 0, B = 0, C = 0, D = 0;
-			UINT64 liPointer = Index * 4 * sizeof(UINT64);
+			UINT64 liPointer;
+			
+			if (Index == 0) {
+				liPointer = Index * 4 * sizeof(UINT64);
+			} else {
+				liPointer = (Index * 4 - 1) * sizeof(UINT64);
+			}
+
 			fseek(hFile1, liPointer, SEEK_SET);
 			UINT64 temp = 0;
-			count = fread(&temp, 1, sizeof(UINT64), hFile1);
+
+			if (Index > 0) {
+				count = fread(&temp, 1, sizeof(UINT64), hFile1);
+			} else {
+				// кодируем в начале файла исходный размер
+				count = 1;
+				temp = size;
+			}
+
 			memcpy(&A, &temp, count);
 
 			if (count > 0) {
@@ -166,12 +179,12 @@ int main()
 			Index++;
 		} while(count > 0);
 
-		cout << "Finish encode" << endl;
-
 		FILE *hKey1;
 		hKey1 = fopen("key2.bin", "w+");
 		fwrite(key, sizeof(UINT64), 16, hKey1);
 		fclose(hKey1);
+		fclose(hFile1);
+		fclose(hFile2);
 		free(key);
 	} else {
 		// decode
@@ -238,10 +251,42 @@ int main()
 		} while (Index != 0);
 
 		free(key);
+		fseek(hFile2, 0, SEEK_SET);
+		// читаем в начале файла размер до шифрования
+		UINT64 sizeOutput = 0;
+		count = fread(&sizeOutput, 1, sizeof(UINT64), hFile2);
+
+		fclose(hFile1);
+		fclose(hFile2);
+
+		string newFile(szFile2);
+		hFile1 = fopen(szFile2, "r+");
+		newFile += ".temp";
+		hFile2 = fopen(newFile.c_str(), "w+");
+		UINT64 offset = sizeof(UINT64);
+		UINT8 *buffer;
+		int bufferSize = 128;
+		buffer = (UINT8 *) malloc(sizeof(UINT8) * bufferSize);
+		UINT64 outputOffset = 0;
+
+		do {
+			fseek(hFile1, offset, SEEK_SET);
+			memset(buffer, 0, bufferSize);
+			count = fread(buffer, sizeof(UINT8), bufferSize, hFile1);
+
+			if (outputOffset + count * sizeof(UINT8) > sizeOutput) {
+				count = sizeOutput - outputOffset;
+			}
+
+			fwrite(buffer, sizeof(UINT8), count, hFile2);
+			offset += count * sizeof(UINT8);
+			outputOffset += count * sizeof(UINT8);
+		} while (outputOffset < sizeOutput && count != 0);
+
+		fclose(hFile1);
+		fclose(hFile2);
 	}
 
-	fclose(hFile1);
-	fclose(hFile2);
 	return 0;
 }
 
