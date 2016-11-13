@@ -58,11 +58,25 @@ class Randomizer_2011
     UINT32 old_ci;
 };
 
+void help ()
+{
+	cout << "Help message for coder:" << endl;
+	cout << "-i <path> Input file" << endl;
+	cout << "-o <path> Output file" << endl;
+	cout << "-e Encode mode" << endl;
+	cout << "-d Decode mode" << endl;
+}
+
 Randomizer_2011 randomizer;
 
 int main(int argc, char* argv[])
 {
 	CommandLine commandLine(argc, argv);
+
+	if (commandLine.is("-h") || commandLine.is("--help")) {
+		help();
+		return 0;
+	}
 
 	FILE *hFile1, *hFile2;
 	char *szFile1;
