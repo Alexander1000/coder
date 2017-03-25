@@ -2,6 +2,7 @@
 #include <fstream>
 #include <ctime>
 #include "cl.cpp"
+#include "coder.cpp"
 
 using namespace std;
 
@@ -78,11 +79,14 @@ int main(int argc, char* argv[])
 		return 0;
 	}
 
+	coder::Coder coder;
+
 	FILE *hFile1, *hFile2;
 	char *szFile1;
 
 	if (commandLine.is("-i")) {
 		szFile1 = commandLine.get("-i");
+		coder.setInputFile(szFile1);
 	} else {
 		szFile1 = new char[100];
 		memset(szFile1, 0, 100);
@@ -95,6 +99,7 @@ int main(int argc, char* argv[])
 
 	if (commandLine.is("-o")) {
 		szFile2 = commandLine.get("-o");
+		coder.setOutputFile(szFile2);
 	} else {
 		szFile2 = new char[100];
 		memset(szFile2, 0, 100);
