@@ -106,13 +106,9 @@ namespace coder
                 // std::cout << "Temp: " << temp << endl;
                 // std::cout << "A: " << A << endl;
 
-                if (count > 0) {
-                    count = this->fileInputBuffer->Read((BYTE*) &temp, sizeof(UINT64));
-                    memcpy(&B, &temp, count);
-                } else {
-                    count = 0;
-                }
-
+                count = this->fileInputBuffer->Read((BYTE*) &temp, sizeof(UINT64));
+                memcpy(&B, &temp, count);
+                
                 if (count > 0) {
                     count = this->fileInputBuffer->Read((BYTE*) &temp, sizeof(UINT64));
                     memcpy(&C, &temp, count);
@@ -163,8 +159,10 @@ namespace coder
             UINT64 liPointer;
             UINT64 sourceSize = 0;
             
-            // std::cout << "decode" << endl;
-            // std::cout << size << " size" << endl;
+            std::cout << "decode" << endl;
+            std::cout << size << " size" << endl;
+            
+            std::cout << endl;
 
             do
             {
@@ -174,14 +172,17 @@ namespace coder
                 std::cout << Index << " index" << endl;
                 
                 liPointer = (Index - 1) * tupleSize;
+                
+                std::cout << "liPointer: " << liPointer << endl;
+                
                 this->fileInputBuffer->Seek(liPointer);
 
                 count = this->fileInputBuffer->Read((BYTE*) &temp, sizeof(UINT64));
-		memcpy(&A, &temp, count / sizeof(UINT64));
+		memcpy(&A, &temp, count);
 
-		if(count > 0) {
+		if (count > 0) {
                     count = this->fileInputBuffer->Read((BYTE*) &temp, sizeof(UINT64));
-                    memcpy(&B, &temp, count / sizeof(UINT64));
+                    memcpy(&B, &temp, count);
 		} else {
                     if (count == 0) break;
                     count = 0;
@@ -189,14 +190,14 @@ namespace coder
 
                 if (count > 0) {
                     count = this->fileInputBuffer->Read((BYTE*) &temp, sizeof(UINT64));
-                    memcpy(&C, &temp, count / sizeof(UINT64));
+                    memcpy(&C, &temp, count);
                 } else {
                     count = 0;
                 }
 
                 if (count > 0) {
                     count = this->fileInputBuffer->Read((BYTE*) &temp, sizeof(UINT64));
-                    memcpy(&D, &temp, count / sizeof(UINT64));
+                    memcpy(&D, &temp, count);
                 } else {
                     count = 0;
                 }
@@ -222,6 +223,7 @@ namespace coder
                 this->fileOutputBuffer->Write((BYTE*) &D, sizeof(UINT64));
 
                 Index--;
+                std::cout << endl;
             } while (Index != 0);
             
             std::cout << "source size: " << sourceSize << endl;
