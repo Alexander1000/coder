@@ -209,12 +209,13 @@ namespace coder
                 // std::cout << "before write output" << endl;
                 
                 // liPointer = ((Index - 1) * 4 - 1) * sizeof(UINT64);
-                liPointer = (Index - 1) * tupleSize - sizeof(UINT64);
-                this->fileOutputBuffer->Seek(liPointer);
-
+                
                 if (Index > 1) {
+                    liPointer -= sizeof(UINT64);
+                    this->fileOutputBuffer->Seek(liPointer);
                     this->fileOutputBuffer->Write((BYTE*) &A, sizeof(UINT64));
                 } else {
+                    this->fileOutputBuffer->Seek(0);
                     sourceSize = A;
                 }
 
@@ -235,6 +236,7 @@ namespace coder
 
             this->fileInputBuffer->Close();
             this->fileOutputBuffer->Close();
+            this->keyFileInBuffer->Close();
         }
 
     protected:
