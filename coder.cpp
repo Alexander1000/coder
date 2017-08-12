@@ -80,9 +80,6 @@ namespace coder
             UINT64 *key = new UINT64[16];
             
             count = this->keyFileInBuffer->Read((BYTE*) key, sizeof(UINT64) * 16);
-
-            std::cout << "encode" << endl;
-            std::cout << "file size: " << size << endl;
           
             do {
 		UINT64 A = 0, B = 0, C = 0, D = 0;
@@ -154,22 +151,13 @@ namespace coder
             UINT64 Index = size / tupleSize;
             UINT64 liPointer;
             UINT64 sourceSize = 0;
-            
-            std::cout << "decode" << endl;
-            std::cout << size << " size" << endl;
-            
-            std::cout << endl;
 
             do
             {
 		UINT64 A = 0, B = 0, C = 0, D = 0;
 		UINT64 temp = 0;
                 
-                std::cout << Index << " index" << endl;
-                
                 liPointer = (Index - 1) * tupleSize;
-                
-                std::cout << "liPointer: " << liPointer << endl;
                 
                 this->fileInputBuffer->Seek(liPointer);
 
@@ -216,7 +204,6 @@ namespace coder
                 this->fileOutputBuffer->Write((BYTE*) &D, sizeof(UINT64));
 
                 Index--;
-                std::cout << endl;
             } while (Index != 0);
             
             free(key);
