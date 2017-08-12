@@ -1,4 +1,5 @@
 #include <fstream>
+#include <unistd.h>
 
 namespace coder
 {
@@ -89,6 +90,11 @@ namespace coder
         void Seek(UINT64 position)
         {
             fseek(this->hFile, position, SEEK_SET);
+        }
+        
+        void SetSize(int size)
+        {
+            ftruncate(fileno(this->hFile), (off_t) size);
         }
         
         void Close()

@@ -206,6 +206,8 @@ namespace coder
                 Index--;
             } while (Index != 0);
             
+            this->fileOutputBuffer->SetSize(sourceSize);
+            
             free(key);
 
             this->fileInputBuffer->Close();

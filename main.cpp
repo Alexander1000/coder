@@ -106,7 +106,6 @@ int main(int argc, char* argv[])
             }
                 
             coder.setKeyFileOut((char*) "key2.bin");
-            cout << "debug before encode" << endl;
             coder.encode();
 	} else {
             // decode
