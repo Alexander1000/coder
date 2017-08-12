@@ -101,10 +101,6 @@ namespace coder
                 }
 
                 memcpy(&A, &temp, count);
-                
-                // std::cout << "count: " << count << endl;
-                // std::cout << "Temp: " << temp << endl;
-                // std::cout << "A: " << A << endl;
 
                 count = this->fileInputBuffer->Read((BYTE*) &temp, sizeof(UINT64));
                 memcpy(&B, &temp, count);
@@ -206,10 +202,6 @@ namespace coder
                     this->DecodePart(&A, &B, &C, &D, &key[15 - i]);
                 }
                 
-                // std::cout << "before write output" << endl;
-                
-                // liPointer = ((Index - 1) * 4 - 1) * sizeof(UINT64);
-                
                 if (Index > 1) {
                     liPointer -= sizeof(UINT64);
                     this->fileOutputBuffer->Seek(liPointer);
@@ -226,11 +218,6 @@ namespace coder
                 Index--;
                 std::cout << endl;
             } while (Index != 0);
-            
-            std::cout << "source size: " << sourceSize << endl;
-            
-            // this->fileOutputBuffer->Seek(sourceSize);
-            // this->fileOutputBuffer->Write((BYTE*) &key, 0);
             
             free(key);
 
