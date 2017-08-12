@@ -15,7 +15,7 @@ class CommandLine
         }
 
         /**
-         * Check paramter exists
+         * Check parameter exists
          */
         bool is (char *param)
         {
