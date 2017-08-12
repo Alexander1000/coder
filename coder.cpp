@@ -80,8 +80,9 @@ namespace coder
             UINT64 *key = new UINT64[16];
             
             count = this->keyFileInBuffer->Read((BYTE*) key, sizeof(UINT64) * 16);
-            
-            // std::cout << "encode" << endl;
+
+            std::cout << "encode" << endl;
+            std::cout << "file size: " << size << endl;
           
             do {
 		UINT64 A = 0, B = 0, C = 0, D = 0;
@@ -91,29 +92,37 @@ namespace coder
                     count = this->fileInputBuffer->Read((BYTE*) &temp, sizeof(UINT64));
                 } else {
                     // кодируем в начале файла исходный размер
-                    count = 1;
+                    count = sizeof(UINT64);
                     temp = size;
                 }
+                
+                if (count == 0) {
+                    break;
+                }
 
-                memcpy(&A, &temp, count / sizeof(UINT64));
+                memcpy(&A, &temp, count);
+                
+                // std::cout << "count: " << count << endl;
+                // std::cout << "Temp: " << temp << endl;
+                // std::cout << "A: " << A << endl;
 
                 if (count > 0) {
                     count = this->fileInputBuffer->Read((BYTE*) &temp, sizeof(UINT64));
-                    memcpy(&B, &temp, count / sizeof(UINT64));
+                    memcpy(&B, &temp, count);
                 } else {
                     count = 0;
                 }
 
                 if (count > 0) {
                     count = this->fileInputBuffer->Read((BYTE*) &temp, sizeof(UINT64));
-                    memcpy(&C, &temp, count / sizeof(UINT64));
+                    memcpy(&C, &temp, count);
                 } else {
                     count = 0;
                 }
 
                 if (count > 0) {
                     count = this->fileInputBuffer->Read((BYTE*) &temp, sizeof(UINT64));
-                    memcpy(&D, &temp, count / sizeof(UINT64));
+                    memcpy(&D, &temp, count);
                 } else {
                     count = 0;
                 }
@@ -130,7 +139,14 @@ namespace coder
                 Index++;
             } while(count > 0);
 
-            this->keyFileOutBuffer->Write((BYTE*) &key, sizeof(UINT64) * 16);
+            for (int i = 0; i < 16; i++) {
+                this->keyFileOutBuffer->Write((BYTE*) &key[i], sizeof(UINT64));
+            }
+            
+            this->fileInputBuffer->Close();
+            this->fileOutputBuffer->Close();
+            this->keyFileOutBuffer->Close();
+            this->keyFileInBuffer->Close();
             free(key);
         }
 
@@ -167,7 +183,7 @@ namespace coder
                     count = this->fileInputBuffer->Read((BYTE*) &temp, sizeof(UINT64));
                     memcpy(&B, &temp, count / sizeof(UINT64));
 		} else {
-                    // if (count == 0) break;
+                    if (count == 0) break;
                     count = 0;
 		}
 
